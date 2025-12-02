@@ -30,9 +30,14 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             : 'bg-green-900/20 border-green-800/50 text-slate-100 rounded-tr-none'
         }`}>
           {message.isError ? (
-            <div className="flex items-center text-red-400 gap-2">
-              <AlertTriangle size={18} />
-              <span>Error generating response. Please try again.</span>
+            <div className="flex flex-col gap-1 text-red-400">
+              <div className="flex items-center gap-2">
+                 <AlertTriangle size={18} />
+                 <span className="font-bold">System Error</span>
+              </div>
+              <p className="text-sm text-red-300/90 pl-6 break-words">
+                {message.content}
+              </p>
             </div>
           ) : (
             <MarkdownRenderer content={message.content} />

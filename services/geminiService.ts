@@ -5,15 +5,19 @@ let client: GoogleGenAI | null = null;
 let chatSession: Chat | null = null;
 
 export const initializeGemini = () => {
+  // Explicitly check for the API key to provide a better error message
   if (!process.env.API_KEY) {
-    console.error("API_KEY is missing from environment variables.");
-    return;
+    throw new Error("API_KEY is missing. Please set it in your environment variables.");
   }
   client = new GoogleGenAI({ apiKey: process.env.API_KEY });
 };
 
 export const createChatSession = (): Chat => {
-  if (!client) initializeGemini();
+  // Try to initialize if not already done
+  if (!client) {
+    initializeGemini();
+  }
+  
   if (!client) throw new Error("Failed to initialize Gemini Client");
 
   chatSession = client.chats.create({

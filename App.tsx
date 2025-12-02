@@ -29,8 +29,19 @@ function App() {
         timestamp: Date.now()
       };
       setChatState(prev => ({ ...prev, messages: [initialGreeting] }));
-    } catch (e) {
+    } catch (e: any) {
       console.error("Failed to init chat", e);
+      // If init fails immediately (e.g. missing API key), show error
+      const errorMessage: Message = {
+        id: 'init-error',
+        role: Role.MODEL,
+        content: e.message?.includes("API_KEY") 
+          ? "Configuration Error: `API_KEY` is missing from environment variables. Please add it to your deployment settings."
+          : "System Initialization Failed. Please refresh the page.",
+        timestamp: Date.now(),
+        isError: true
+      };
+      setChatState(prev => ({ ...prev, messages: [errorMessage] }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -63,10 +74,6 @@ function App() {
     setStreamingText('');
 
     try {
-      // Prepend context if changing categories significantly, but usually the system prompt handles it.
-      // We can inject the current category context if needed, but the model is smart enough.
-      // Let's just send the user message.
-      
       const stream = sendMessageStream(inputText);
       let fullResponse = '';
 
@@ -91,12 +98,22 @@ function App() {
       }));
       setStreamingText('');
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Chat error:", error);
+      
+      let errorMsg = "I encountered an error processing your request.";
+      
+      // Check for specific error types to give better feedback
+      if (error.message?.includes("API_KEY") || error.message?.includes("API key")) {
+        errorMsg = "Configuration Error: `API_KEY` is missing. Please add it to your Vercel project settings.";
+      } else if (error.message?.includes("fetch")) {
+         errorMsg = "Network Error: Unable to reach the AI service. Please check your internet connection.";
+      }
+
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: Role.MODEL,
-        content: "I encountered an error processing your request. Please check your connection or API key.",
+        content: errorMsg,
         timestamp: Date.now(),
         isError: true
       };
@@ -118,7 +135,11 @@ function App() {
 
   const handleClearChat = () => {
     if (window.confirm("Are you sure you want to clear the current session history?")) {
-      createChatSession(); // Reset Gemini session context
+      try {
+        createChatSession(); // Reset Gemini session context
+      } catch (e) {
+        console.error("Failed to reset session", e);
+      }
       setChatState(prev => ({
         ...prev,
         messages: [{
