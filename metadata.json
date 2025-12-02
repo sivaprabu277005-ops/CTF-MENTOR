@@ -1,0 +1,5 @@
+{
+  "name": "CTF Mentor",
+  "description": "An AI-powered Capture The Flag assistant that helps you learn cybersecurity concepts through progressive hints and ethical guidance.",
+  "requestFramePermissions": []
+}
