@@ -35,9 +35,7 @@ function App() {
       const errorMessage: Message = {
         id: 'init-error',
         role: Role.MODEL,
-        content: e.message?.includes("API_KEY") 
-          ? "Configuration Error: `API_KEY` is missing from environment variables. Please add it to your deployment settings."
-          : "System Initialization Failed. Please refresh the page.",
+        content: "Configuration Error: `API_KEY` is missing. Please add it to your Vercel project settings under **Settings > Environment Variables**.",
         timestamp: Date.now(),
         isError: true
       };
@@ -104,9 +102,10 @@ function App() {
       let errorMsg = "I encountered an error processing your request.";
       
       // Check for specific error types to give better feedback
-      if (error.message?.includes("API_KEY") || error.message?.includes("API key")) {
-        errorMsg = "Configuration Error: `API_KEY` is missing. Please add it to your Vercel project settings.";
-      } else if (error.message?.includes("fetch")) {
+      const errorText = error.message || error.toString();
+      if (errorText.includes("API_KEY") || errorText.includes("API key") || errorText.includes("process is not defined")) {
+        errorMsg = "Configuration Error: `API_KEY` is missing. Please add it to your Vercel project settings (Settings > Environment Variables).";
+      } else if (errorText.includes("fetch") || errorText.includes("network")) {
          errorMsg = "Network Error: Unable to reach the AI service. Please check your internet connection.";
       }
 

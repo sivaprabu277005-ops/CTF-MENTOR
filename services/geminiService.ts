@@ -5,11 +5,27 @@ let client: GoogleGenAI | null = null;
 let chatSession: Chat | null = null;
 
 export const initializeGemini = () => {
+  let apiKey: string | undefined;
+  
+  try {
+    // Safely access process.env to avoid ReferenceError in browsers where process is not defined
+    apiKey = process.env.API_KEY;
+  } catch (e) {
+    // process is not defined, apiKey remains undefined
+    console.warn("Unable to access process.env");
+  }
+
+  // Fallback if env var is missing (User provided key)
+  if (!apiKey) {
+    apiKey = "AIzaSyDcuBF4GzD4fjG__RBtNRv_rHDK83eK-tU";
+  }
+
   // Explicitly check for the API key to provide a better error message
-  if (!process.env.API_KEY) {
+  if (!apiKey) {
     throw new Error("API_KEY is missing. Please set it in your environment variables.");
   }
-  client = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  
+  client = new GoogleGenAI({ apiKey });
 };
 
 export const createChatSession = (): Chat => {
